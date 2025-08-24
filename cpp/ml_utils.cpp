@@ -5,16 +5,30 @@
 #include <numeric>
 #include <iostream>
 
-// String vektörünü sayısal veriye dönüştürme
 DataPoint convert_to_numeric(const std::vector<std::string>& row, const std::vector<size_t>& feature_indices) {
     DataPoint numeric_row;
     for (auto idx : feature_indices) {
         if (idx < row.size()) {
             try {
+                // Temizlenmiş değeri dönüştürme
                 numeric_row.push_back(std::stod(row[idx]));
-            } catch (const std::invalid_argument&) {
+            } catch (const std::invalid_argument& e) {
+                // Dönüşüm başarısız olursa, "M"/"B" için özel işlem yap
+                if (row[idx] == "M") {
+                    numeric_row.push_back(1.0);
+                } else if (row[idx] == "B") {
+                    numeric_row.push_back(0.0);
+                } else {
+                    std::cerr << "Dönüşüm hatası: " << e.what() << " - değer: '" << row[idx] << "'" << std::endl;
+                    numeric_row.push_back(0.0);  // Dönüşüm hatalıysa 0 ata
+                }
+            } catch (const std::out_of_range& e) {
+                std::cerr << "Aralık dışı hatası: " << e.what() << " - değer: '" << row[idx] << "'" << std::endl;
                 numeric_row.push_back(0.0);  // Dönüşüm hatalıysa 0 ata
             }
+        } else {
+            std::cerr << "İndeks hata: " << idx << " >= " << row.size() << std::endl;
+            numeric_row.push_back(0.0);  // İndeks sınırları dışındaysa 0 ata
         }
     }
     return numeric_row;
@@ -28,23 +42,51 @@ void split_data(const std::vector<std::vector<std::string>>& data,
     features.clear();
     labels.clear();
     
+    std::cout << "Verileri özelliklere ve etiketlere ayırıyorum..." << std::endl;
+    std::cout << "Sütun sayısı: " << (data.empty() ? 0 : data[0].size()) << std::endl;
+    std::cout << "Özellik indeksleri: ";
+    for (auto idx : feature_indices) std::cout << idx << " ";
+    std::cout << std::endl;
+    std::cout << "Hedef indeksi: " << target_index << std::endl;
+    
     // İlk satır başlık satırı, bu yüzden 1'den başla
     for (size_t i = 1; i < data.size(); ++i) {
         const auto& row = data[i];
         if (row.size() > target_index) {
-            // Hedef sütunu sayıya dönüştür
             try {
-                int label = std::stoi(row[target_index]);
+                // Hedef sütun değerini al
+                int label = -1;
+                std::string target_value = row[target_index];
+                
+                // Şimdi değeri kontrol et
+                if (target_value == "M") {
+                    label = 1;  // Malignant (kötü huylu) -> 1
+                } else if (target_value == "B") {
+                    label = 0;  // Benign (iyi huylu) -> 0
+                } else {
+                    try {
+                        // Eğer sayısal bir değerse doğrudan dönüştür
+                        label = std::stoi(target_value);
+                    } catch (...) {
+                        std::cerr << "Bilinmeyen etiket değeri: " << target_value << " (satır " << i << ")" << std::endl;
+                        continue;  // Bu satırı atla
+                    }
+                }
+                
                 labels.push_back(label);
                 
                 // Özellikleri dönüştür
                 features.push_back(convert_to_numeric(row, feature_indices));
-            } catch (const std::invalid_argument&) {
+            } catch (const std::exception& e) {
                 // Dönüşüm hatalıysa atla
+                std::cerr << "Veri dönüşüm hatası (satır " << i << "): " << e.what() << std::endl;
             }
         }
     }
+    
+    std::cout << "Özellikler ve etiketler ayrıldı. Örnek sayısı: " << features.size() << std::endl;
 }
+    
 
 // Verileri eğitim ve test setlerine ayırma
 void train_test_split(const DataSet& features, const Labels& labels,
@@ -89,13 +131,16 @@ void standardize_data(DataSet& features, const DataSet& train_features) {
     
     size_t n_features = train_features[0].size();
     
+    std::cout << "Verileri standartlaştırıyorum..." << std::endl;
+    std::cout << "Örnek sayısı: " << features.size() << ", Özellik sayısı: " << n_features << std::endl;
+    
     // Eğitim verilerinin ortalama ve standart sapmasını hesapla
     std::vector<double> mean(n_features, 0.0);
     std::vector<double> std_dev(n_features, 0.0);
     
     // Ortalamaları hesapla
     for (const auto& sample : train_features) {
-        for (size_t j = 0; j < n_features; ++j) {
+        for (size_t j = 0; j < n_features && j < sample.size(); ++j) {
             mean[j] += sample[j];
         }
     }
@@ -106,7 +151,7 @@ void standardize_data(DataSet& features, const DataSet& train_features) {
     
     // Standart sapmaları hesapla
     for (const auto& sample : train_features) {
-        for (size_t j = 0; j < n_features; ++j) {
+        for (size_t j = 0; j < n_features && j < sample.size(); ++j) {
             std_dev[j] += (sample[j] - mean[j]) * (sample[j] - mean[j]);
         }
     }
@@ -123,6 +168,8 @@ void standardize_data(DataSet& features, const DataSet& train_features) {
             sample[j] = (sample[j] - mean[j]) / std_dev[j];
         }
     }
+    
+    std::cout << "Standartlaştırma tamamlandı." << std::endl;
 }
 
 // KNN sınıflandırıcısı
@@ -136,6 +183,15 @@ double KNNClassifier::euclidean_distance(const DataPoint& a, const DataPoint& b)
         sum += diff * diff;
     }
     return std::sqrt(sum);
+}
+
+// Debugging amaçlı mesafeleri yazdıralım
+void KNNClassifier::print_distances(const std::vector<std::pair<double, int>>& distances, int k) {
+    std::cout << "K=" << k << " için mesafeler ve sınıflar:" << std::endl;
+    for (int i = 0; i < std::min(k, static_cast<int>(distances.size())); ++i) {
+        std::cout << "Komşu " << i+1 << ": Mesafe = " << distances[i].first 
+                  << ", Sınıf = " << (distances[i].second == 0 ? "Benign(0)" : "Malignant(1)") << std::endl;
+    }
 }
 
 void KNNClassifier::fit(const DataSet& X_train, const Labels& y_train) {
@@ -156,23 +212,52 @@ int KNNClassifier::predict(const DataPoint& sample) {
     // Mesafelere göre sırala
     std::sort(distances.begin(), distances.end());
     
-    // En yakın k komşuyu bul ve çoğunluk oylaması yap
-    std::map<int, int> vote_count;
-    for (size_t i = 0; i < std::min(k, static_cast<int>(distances.size())); ++i) {
-        vote_count[distances[i].second]++;
+    // Debugging: Mesafeleri ve sınıfları yazdır
+    print_distances(distances, k);
+    
+    // Sınıf dağılımını kontrol et
+    int class0_count = 0, class1_count = 0;
+    for (int i = 0; i < std::min(k, static_cast<int>(distances.size())); i++) {
+        if (distances[i].second == 0) class0_count++;
+        else if (distances[i].second == 1) class1_count++;
+    }
+    
+    std::cout << "En yakın " << k << " komşuda: Sınıf 0: " << class0_count 
+              << ", Sınıf 1: " << class1_count << std::endl;
+    
+    // Mesafe ağırlıklı oylama
+    std::map<int, double> weighted_votes;
+    weighted_votes[0] = 0.0;  // Sınıf 0 için başlangıç değeri
+    weighted_votes[1] = 0.0;  // Sınıf 1 için başlangıç değeri
+    
+    for (int i = 0; i < std::min(k, static_cast<int>(distances.size())); i++) {
+        // Mesafe 0'a yakınsa büyük bir değer kullan, 0 olamaz
+        double weight = 1.0 / (distances[i].first + 0.0001);
+        weighted_votes[distances[i].second] += weight;
     }
     
     // En çok oy alan etiketi bul
-    int max_votes = 0;
-    int predicted_label = -1;
-    for (const auto& [label, votes] : vote_count) {
-        if (votes > max_votes) {
-            max_votes = votes;
-            predicted_label = label;
+    std::cout << "K=" << k << " için ağırlıklı oylar:" << std::endl;
+    for (const auto& [label, votes] : weighted_votes) {
+        std::cout << "Sınıf " << label << ": " << votes << " ağırlıklı oy" << std::endl;
+    }
+    
+    // En yüksek ağırlıklı oyu alan sınıfı bul
+    double max_votes = 0.0;
+    int predicted_class = 0; // Eşitlik durumunda sınıf 0'ı tercih et
+    
+    for (const auto& vote : weighted_votes) {
+        if (vote.second > max_votes) {
+            max_votes = vote.second;
+            predicted_class = vote.first;
+        } else if (std::abs(vote.second - max_votes) < 1e-10 && vote.first == 0) {
+            // Eşitlik durumunda sınıf 0'ı tercih et
+            predicted_class = 0;
         }
     }
     
-    return predicted_label;
+    std::cout << "Tahmin edilen sınıf: " << predicted_class << "\n\n";
+    return predicted_class;
 }
 
 Labels KNNClassifier::predict(const DataSet& samples) {
@@ -222,11 +307,11 @@ std::vector<std::vector<int>> confusion_matrix(const Labels& y_true, const Label
 
 // Karmaşıklık matrisini yazdırma
 void print_confusion_matrix(const std::vector<std::vector<int>>& cm) {
-    std::cout << "\nKarmaşıklık Matrisi:" << std::endl;
-    std::cout << "    | Tahmin:0 | Tahmin:1 |" << std::endl;
-    std::cout << "--------------------------" << std::endl;
-    std::cout << "Gerçek:0 |    " << cm[0][0] << "    |    " << cm[0][1] << "    |" << std::endl;
-    std::cout << "Gerçek:1 |    " << cm[1][0] << "    |    " << cm[1][1] << "    |" << std::endl;
+    std::cout << "                | Predicted:      | Predicted:      |" << std::endl;
+    std::cout << "                | Benign (Class 0)| Malignant (Class 1)" << std::endl;
+    std::cout << "----------------+----------------+------------------" << std::endl;
+    std::cout << "Actual: Benign  | " << cm[0][0] << " (True Neg)    | " << cm[0][1] << " (False Pos)" << std::endl;
+    std::cout << "Actual: Malignant | " << cm[1][0] << " (False Neg)   | " << cm[1][1] << " (True Pos)" << std::endl;
     
     // Metrikler hesaplama
     int tp = cm[1][1]; // True Positive
@@ -239,7 +324,7 @@ void print_confusion_matrix(const std::vector<std::vector<int>>& cm) {
     double recall = tp > 0 ? static_cast<double>(tp) / (tp + fn) : 0.0;
     double f1_score = (precision + recall > 0) ? 2.0 * precision * recall / (precision + recall) : 0.0;
     
-    std::cout << "\nMetrikler:" << std::endl;
+    std::cout << "\nPerformans Metrikleri:" << std::endl;
     std::cout << "Doğruluk (Accuracy): " << accuracy * 100.0 << "%" << std::endl;
     std::cout << "Kesinlik (Precision): " << precision * 100.0 << "%" << std::endl;
     std::cout << "Duyarlılık (Recall): " << recall * 100.0 << "%" << std::endl;

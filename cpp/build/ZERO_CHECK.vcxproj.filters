@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\sahin\Documents\GitHub\Breast-Cancer-Classification\cpp\build\CMakeFiles\88fff0b199a482e16391a7c1eb135828\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{32AD270E-4FEA-3555-8F81-242C15FDFEB6}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

@@ -38,9 +38,9 @@ private:
     DataSet training_data;
     Labels training_labels;
     int k;
-
-    // İki nokta arasındaki öklid mesafesini hesaplama
+    
     double euclidean_distance(const DataPoint& a, const DataPoint& b);
+    void print_distances(const std::vector<std::pair<double, int>>& distances, int k);
 
 public:
     KNNClassifier(int k = 5);

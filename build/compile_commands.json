@@ -1,0 +1,32 @@
+[
+{
+  "directory": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/breast_cancer_classification.dir/includes_CXX.rsp -g -std=gnu++1z -o CMakeFiles\\breast_cancer_classification.dir\\main.cpp.obj -c C:\\Users\\sahin\\Documents\\GitHub\\Breast-Cancer-Classification\\cpp\\main.cpp",
+  "file": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/cpp/main.cpp",
+  "output": "CMakeFiles/breast_cancer_classification.dir/main.cpp.obj"
+},
+{
+  "directory": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/breast_cancer_classification.dir/includes_CXX.rsp -g -std=gnu++1z -o CMakeFiles\\breast_cancer_classification.dir\\data_utils.cpp.obj -c C:\\Users\\sahin\\Documents\\GitHub\\Breast-Cancer-Classification\\cpp\\data_utils.cpp",
+  "file": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/cpp/data_utils.cpp",
+  "output": "CMakeFiles/breast_cancer_classification.dir/data_utils.cpp.obj"
+},
+{
+  "directory": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/breast_cancer_classification.dir/includes_CXX.rsp -g -std=gnu++1z -o CMakeFiles\\breast_cancer_classification.dir\\preprocess_utils.cpp.obj -c C:\\Users\\sahin\\Documents\\GitHub\\Breast-Cancer-Classification\\cpp\\preprocess_utils.cpp",
+  "file": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/cpp/preprocess_utils.cpp",
+  "output": "CMakeFiles/breast_cancer_classification.dir/preprocess_utils.cpp.obj"
+},
+{
+  "directory": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/breast_cancer_classification.dir/includes_CXX.rsp -g -std=gnu++1z -o CMakeFiles\\breast_cancer_classification.dir\\ml_utils.cpp.obj -c C:\\Users\\sahin\\Documents\\GitHub\\Breast-Cancer-Classification\\cpp\\ml_utils.cpp",
+  "file": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/cpp/ml_utils.cpp",
+  "output": "CMakeFiles/breast_cancer_classification.dir/ml_utils.cpp.obj"
+},
+{
+  "directory": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/build",
+  "command": "C:\\MinGW\\bin\\g++.exe  @CMakeFiles/breast_cancer_classification.dir/includes_CXX.rsp -g -std=gnu++1z -o CMakeFiles\\breast_cancer_classification.dir\\visualization.cpp.obj -c C:\\Users\\sahin\\Documents\\GitHub\\Breast-Cancer-Classification\\cpp\\visualization.cpp",
+  "file": "C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/cpp/visualization.cpp",
+  "output": "CMakeFiles/breast_cancer_classification.dir/visualization.cpp.obj"
+}
+]

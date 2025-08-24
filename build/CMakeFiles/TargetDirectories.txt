@@ -1,0 +1,3 @@
+C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/build/CMakeFiles/breast_cancer_classification.dir
+C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/build/CMakeFiles/edit_cache.dir
+C:/Users/sahin/Documents/GitHub/Breast-Cancer-Classification/build/CMakeFiles/rebuild_cache.dir

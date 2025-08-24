@@ -52,21 +52,21 @@ void print_bar_chart(const std::vector<std::pair<std::string, double>>& data, co
     
     // Max değeri bul
     double max_val = 0.0;
-    for (const auto& [_, value] : data) {
-        max_val = std::max(max_val, value);
+    for (const auto& item : data) {
+        max_val = std::max(max_val, item.second);
     }
     
     // Grafiği yazdır
     std::cout << "\n" << title << std::endl;
     std::cout << std::string(width + 20, '-') << std::endl;
     
-    for (const auto& [label, value] : data) {
+    for (const auto& item : data) {
         // Etiketi yazdır
-        std::cout << std::setw(15) << std::left << label << " | ";
+        std::cout << std::setw(15) << std::left << item.first << " | ";
         
         // Çubuğu çiz
-        int bar_width = static_cast<int>((value / max_val) * width);
-        std::cout << std::string(bar_width, '#') << " " << value << std::endl;
+        int bar_width = static_cast<int>((item.second / max_val) * width);
+        std::cout << std::string(bar_width, '#') << " " << item.second << std::endl;
     }
     
     std::cout << std::string(width + 20, '-') << std::endl;
@@ -92,9 +92,9 @@ void print_roc_curve(const std::vector<std::pair<double, double>>& points) {
     }
     
     // Noktaları işaretle
-    for (const auto& [fpr, tpr] : points) {
-        int x = static_cast<int>(fpr * (size-1));
-        int y = size-1 - static_cast<int>(tpr * (size-1));
+    for (const auto& point : points) {
+        int x = static_cast<int>(point.first * (size-1));
+        int y = size-1 - static_cast<int>(point.second * (size-1));
         
         // Sınırlar içinde kontrol
         if (x >= 0 && x < size && y >= 0 && y < size) {

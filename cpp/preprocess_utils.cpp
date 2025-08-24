@@ -1,10 +1,13 @@
 #include "data_utils.h"
+#include "preprocess_utils.h"
 #include <iostream>
 #include <algorithm>
 
 // Gereksiz sütunları kaldırma
 void remove_columns(std::vector<std::vector<std::string>>& data, const std::vector<std::string>& columns_to_remove) {
     if (data.empty()) return;
+    if (data[0].empty()) return;
+    
     std::vector<size_t> indices;
     for (const auto& col : columns_to_remove) {
         auto it = std::find(data[0].begin(), data[0].end(), col);
